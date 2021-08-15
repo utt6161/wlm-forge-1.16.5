@@ -1,0 +1,34 @@
+create table users(
+    id int primary key auto_increment,
+    username varchar(255) not null
+);
+
+insert into users (`username`) values ('14578aaa'),('5222fff'),('ihateforge');
+
+
+CREATE EVENT remove_expired_records
+ON SCHEDULE EVERY 1 MINUTE
+DO
+DELETE FROM users WHERE CURRENT_DATETIME() >= users.end_datetime;
+
+/// from create in mariadb
+CREATE TABLE `users` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`username` VARCHAR(255) NOT NULL COLLATE 'latin1_swedish_ci',
+	`start_datetime` TIMESTAMP NOT NULL DEFAULT current_timestamp() COMMENT 'Дата добавления записи',
+	`end_datetime` TIMESTAMP NOT NULL DEFAULT (current_timestamp() + interval 1 minute) COMMENT 'Дата для удаления записи',
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=30
+;
+
+// trigger for deletion
+
+CREATE OR REPLACE EVENT remove_expired_records
+ON SCHEDULE EVERY 1 MINUTE
+STARTS CURRENT_TIMESTAMP
+on completion PRESERVE
+DO
+DELETE DELETE FROM users WHERE users.end_datetime <= NOW()

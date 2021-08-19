@@ -31,7 +31,7 @@ public class AddUserCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        Updater.getInstance().addPlayerFromCommand(getString(context, "user"), getString(context, "months"));
+        Updater.getInstance().addPlayerFromCommandOrDonation(getString(context, "user"), getString(context, "months"), false);
         return 0;
     }
 

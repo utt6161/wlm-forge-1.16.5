@@ -13,10 +13,16 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.minecraft.server.MinecraftServer;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(WL.MODID)
 public class WL
@@ -24,6 +30,7 @@ public class WL
     static final String MODID = "wl";
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger();
+    public static final ExecutorService THREADPOOL = Executors.newCachedThreadPool();
 
     public WL() {
         DistExecutor.runWhenOn(Dist.DEDICATED_SERVER, () -> () ->{
@@ -46,7 +53,9 @@ public class WL
             return;
         }
         if(tick >= Config.whitelistreloadtime){
-            Updater.getInstance().run();
+            THREADPOOL.submit(()->{
+                Updater.getInstance().run();
+            });
             tick = 0;
         }
     }
@@ -68,5 +77,18 @@ public class WL
     @SubscribeEvent
     public void onServerStart(FMLServerStartedEvent event){
         Updater.getInstance().StartSyncing();
+    }
+
+    @SubscribeEvent
+    public void onServerStopped(FMLServerStoppedEvent event){
+        try {
+            THREADPOOL.shutdownNow();
+            if (!THREADPOOL.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                Thread.currentThread().interrupt();
+            }
+        } catch (InterruptedException e) {
+            LOGGER.info(e.getMessage());
+            THREADPOOL.shutdownNow();
+        }
     }
 }

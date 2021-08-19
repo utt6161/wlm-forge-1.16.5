@@ -38,7 +38,7 @@ public class infoCommand implements Command<CommandSource> {
         LOGGER.info("'/wl money <money>' - change config field 'money'");
         LOGGER.info("'/wl reloadtime <time_in_ticks>' - change config field 'whitelistreloadtime'");
         LOGGER.info("'/wl datoken <da_token>' - change config field 'token'");
-        LOGGER.info("'/wl status' - change config field 'user'");
+        LOGGER.info("'/wl status' - get config displayed");
         LOGGER.info("'/wl info' - the command that you just used :^)");
 
         return 0;
